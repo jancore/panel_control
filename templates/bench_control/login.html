@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}">
+    {% from "_macro.html" import render_form %}
+</head>
+
+<body>
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
+        aria-hidden="true"></div>
+    <div class="wrapper fadeInDown">
+        <div id="formContent">
+            <!-- Tabs Titles -->
+
+            <!-- Icon -->
+            <div class="fadeIn first">
+                <img src="{{ url_for('static', filename='img/logo_ver.png') }}" id="icon" alt="User Icon" />
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                {{ render_form(form.username, class='fadeIn second', type='text', placeholder="Usuario" ) }}
+                {{ render_form(form.password, class='fadeIn third', type='password', placeholder="Contraseña" ) }}
+                <input type="submit" class="fadeIn fourth" value="Log In">
+            </form>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>
