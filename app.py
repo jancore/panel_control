@@ -6,7 +6,7 @@ Created on Mon Dec  9 13:29:34 2019
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_wtf import CSRFProtect
-import forms
+import forms, json
 import gpioFunctions
 
 app =  Flask(__name__)
@@ -64,6 +64,13 @@ def logout():
     if 'username' in session:
         session.pop('username')
     return redirect(url_for('login'))
+
+@app.route('/ajax-login', methods = ['POST'])
+def ajax_login():
+    print(request.form)
+    username = request.form['username']
+    response = { 'status':200, 'username':username, 'id':1}
+    return json.dumps(response)
 
 if __name__ == "__main__":
     app.run(debug = True, port = 8000)
