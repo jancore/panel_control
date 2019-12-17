@@ -17,7 +17,7 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/panel.js') }}"></script>
     {% from "_macro.html" import render_form %}
 
 </head>
@@ -49,6 +49,7 @@
         <div class="jumbotron">
             <h1>Lista de Acciones</h1>
             <form name="panelAcciones" id="cyclesForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <ul class="nav nav-pills pull-right">
                     <li>
                         <div class="row control-group">
@@ -89,8 +90,7 @@
                 </ul>
                 <p class="lead"></p>
                 <p>
-                    <button type="button" class="btn btn-lg btn-success" data-toggle="modal"
-                        data-target="#marchaModal">Marcha</button>
+                    <button type="button" class="btn btn-lg btn-success" data-toggle="modal" data-target="#marchaModal">Marcha</button>
                     <a>{{ render_form(form.actionsForm.stop, id='btnStop', class='btn btn-lg btn-danger', value='Paro') }}</a>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <a>{{ render_form(form.actionsForm.reset, id='btnReset', class='btn btn-lg btn-primary', value='Reset') }}</a>

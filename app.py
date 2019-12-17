@@ -4,7 +4,7 @@ Created on Mon Dec  9 13:29:34 2019
 @author: antoniojavier.perez
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, g
 from flask_wtf import CSRFProtect
 import forms, json
 import gpioFunctions
@@ -22,13 +22,16 @@ funcionesPanel = {
     "reset" : gpioFunctions.resetConsole,
 }
 
+@app.before_request
+def before_request():
+    pass
+
 @app.route("/", methods = ['GET', 'POST'])
 def main():
     global n_cycles, current_cycle
-
     if 'username' not in session:
         return redirect(url_for('login'))
-
+    
     success_message = 'Bienvenido ' + session['username']
     flash(success_message)
 
@@ -49,10 +52,14 @@ def main():
     
     return render_template('bench_control/panel.html', form = panel_form, cycles=n_cycles)
 
+@app.after_request
+def after_request(response):
+    return response
+
 @app.route('/login', methods = ['GET', 'POST'])
-def login():
+def login():    
     login_form = forms.LoginForm(request.form)
-    if request.method == 'POST'  and login_form.validate():
+    if request.method == 'POST' and login_form.validate():
         username = login_form.username.data
         session['username'] = username
         return redirect(url_for('main'))
@@ -69,6 +76,7 @@ def logout():
 def ajax_login():
     print(request.form)
     username = request.form['username']
+    session['username'] = username
     response = { 'status':200, 'username':username, 'id':1}
     return json.dumps(response)
 
