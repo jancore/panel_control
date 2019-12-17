@@ -6,12 +6,16 @@ Created on Mon Dec  9 13:29:34 2019
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g
 from flask_wtf import CSRFProtect
+from config import DevelopmentConfig
+from config import config
+from models import db, User
+from pony.flask import Pony
 import forms, json
 import gpioFunctions
 
 app =  Flask(__name__)
-app.secret_key = 'innovations'
-csrf = CSRFProtect(app)
+app.config.from_object(DevelopmentConfig)
+csrf = CSRFProtect()
 
 n_cycles = 0
 current_cycle = 0
@@ -24,13 +28,14 @@ funcionesPanel = {
 
 @app.before_request
 def before_request():
-    pass
+    if 'username' not in session and request.endpoint != 'login':
+        return redirect(url_for('login'))
+    elif 'username' in session and request.endpoint == 'login':
+        return redirect(url_for('main'))
 
 @app.route("/", methods = ['GET', 'POST'])
 def main():
     global n_cycles, current_cycle
-    if 'username' not in session:
-        return redirect(url_for('login'))
     
     success_message = 'Bienvenido ' + session['username']
     flash(success_message)
@@ -43,7 +48,7 @@ def main():
                 n_cycles = panel_form.cyclesForm.cycles.data
                 if n_cycles == None:
                         n_cycles = 0
-
+                
                 funcionesPanel[panel_form.action()](n_cycles)       
                 return redirect(url_for('main'))
         else:
@@ -81,4 +86,10 @@ def ajax_login():
     return json.dumps(response)
 
 if __name__ == "__main__":
-    app.run(debug = True, port = 8000)
+    csrf.init_app(app)
+
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
+
+    app.run(port = 8000)
