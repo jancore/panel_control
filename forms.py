@@ -1,4 +1,5 @@
-from wtforms import Form, FormField, IntegerField, SubmitField, validators, StringField, PasswordField
+from wtforms import Form, FormField, IntegerField, SubmitField, BooleanField, validators, StringField, PasswordField
+from models import User
 
 class LoginForm(Form):
     username = StringField('Usuario', [
@@ -6,6 +7,20 @@ class LoginForm(Form):
         validators.length(min=4, max=30, message='Nombre de usuario no valido.'),
     ])
     password = PasswordField('Password', [validators.Required(message = 'La contraseña es requerida')])
+
+class CreateForm(Form):
+    admin = BooleanField('Administrador', [validators.Optional(True)])
+    username = StringField('Usuario', [
+        validators.Required(message='Usuario requerido.'),
+        validators.length(min=4, max=30, message='Nombre de usuario no valido.'),
+    ])
+    password = PasswordField('Password', [validators.Required(message = 'La contraseña es requerida')])
+
+    def validate_username(form, field):
+        username = field.data
+        user = User.query.filter_by(username = username).first()
+        if user != None:
+            raise validators.ValidationError('El nombre de usuario ya se encuentra registrado.')
 
 class ActionsForm(Form):
     stop = SubmitField(id="stop")
