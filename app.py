@@ -6,18 +6,31 @@ Created on Mon Dec  9 13:29:34 2019
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, Markup
 from flask_wtf import CSRFProtect
+from flask_socketio import emit, SocketIO
+from flask_restful import Resource, Api
+from asyncThreads import var_socketio, RandomThread
 from config import DevelopmentConfig
-from models import db
-from models import User
+from models import db, User
 import forms, json
 import gpioFunctions
 
 app =  Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
+api = Api(app)
 
 n_cycles = 0
 current_cycle = 0
+
+class CurrentCycles(Resource):
+    def get(self):
+        return {'cycle': current_cycle}
+
+    def put(self):
+        current_cycle = request.form['data']
+        return {'cycle': current_cycle}
+
+api.add_resource(CurrentCycles, '/<string>')
 
 funcionesPanel = {
     "start" : gpioFunctions.startCiclosConsole,
@@ -54,7 +67,23 @@ def main():
     success_message = Markup('<h5>Bienvenido ' + session['username'] + '</h5>')
     flash(success_message)
     
-    return render_template('bench_control/panel.html', form = panel_form, admin = session['admin'], cycles=n_cycles)
+    return render_template('bench_control/panel.html', form = panel_form, admin = session['admin'], cycles=n_cycles, current_cycle=current_cycle)
+
+@var_socketio.on('connect', namespace='/test')
+def test_connect():
+    # need visibility of the global thread object
+    global thread
+    print('Client connected')
+    #Start the random number generator thread only if the thread has not been started before.
+    if not thread.isAlive():
+        print("Starting Thread")
+        thread = RandomThread()
+        thread.start()
+
+@var_socketio.on('my_event', namespace='/test')
+def test_message(message):                        # test_message() is the event callback function.
+    emit('my response', {'data': 'got it!'})      # Trigger a new event called "my response"
+
 
 @app.after_request
 def after_request(response):
@@ -106,18 +135,11 @@ def logout():
         session.pop('username')
     return redirect(url_for('login'))
 
-@app.route('/ajax-login', methods = ['POST'])
-def ajax_login():
-    print(request.form)
-    username = request.form['username']
-    session['username'] = username
-    response = { 'status':200, 'username':username, 'id':1}
-    return json.dumps(response)
-
 if __name__ == "__main__":
     csrf.init_app(app)
-
+    #var_socketio.init_app(app)
     db.init_app(app)
+
     with app.app_context():
         db.create_all()
         user = User.query.filter_by(username = 'admin').first()

@@ -8,9 +8,13 @@
 </head>
 <body>
     <div class="wrapper fadeInDown">
-        <div id="formContent">
+        <div id="formContent">          
           <!-- Icon -->
           <div class="fadeIn first">
+            <!--Close Icon-->
+            <a type="button" class="close" id="closeButton" aria-label="Close" role="button" href="login">
+              <span aria-hidden="true">&times;</span>
+            </a>
             <img src="{{ url_for('static', filename='img/logo_ver.png') }}" id="icon" alt="User Icon" />
           </div>
 
