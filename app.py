@@ -6,8 +6,7 @@ Created on Mon Dec  9 13:29:34 2019
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, Markup
 from flask_wtf import CSRFProtect
-from flask_socketio import emit, SocketIO
-from flask_restful import Resource, Api
+#from flask_restful import Resource, Api
 from asyncThreads import var_socketio, RandomThread
 from config import DevelopmentConfig
 from models import db, User
@@ -17,20 +16,20 @@ import gpioFunctions
 app =  Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
-api = Api(app)
+#api = Api(app)
 
 n_cycles = 0
 current_cycle = 0
 
-class CurrentCycles(Resource):
-    def get(self):
-        return {'cycle': current_cycle}
+# class CurrentCycles(Resource):
+#     def get(self):
+#         return {'cycle': current_cycle}
 
-    def put(self):
-        current_cycle = request.form['data']
-        return {'cycle': current_cycle}
+#     def put(self):
+#         current_cycle = request.form['data']
+#         return {'cycle': current_cycle}
 
-api.add_resource(CurrentCycles, '/<string>')
+#api.add_resource(CurrentCycles, '/<string>')
 
 funcionesPanel = {
     "start" : gpioFunctions.startCiclosConsole,
@@ -58,7 +57,7 @@ def main():
                 if n_cycles == None:
                         n_cycles = 0
                 
-                funcionesPanel[panel_form.action()](n_cycles)       
+                current_cycle = funcionesPanel[panel_form.action()](n_cycles)       
                 return redirect(url_for('main'))
         else:
             funcionesPanel[panel_form.action()](n_cycles)       
@@ -68,22 +67,6 @@ def main():
     flash(success_message)
     
     return render_template('bench_control/panel.html', form = panel_form, admin = session['admin'], cycles=n_cycles, current_cycle=current_cycle)
-
-@var_socketio.on('connect', namespace='/test')
-def test_connect():
-    # need visibility of the global thread object
-    global thread
-    print('Client connected')
-    #Start the random number generator thread only if the thread has not been started before.
-    if not thread.isAlive():
-        print("Starting Thread")
-        thread = RandomThread()
-        thread.start()
-
-@var_socketio.on('my_event', namespace='/test')
-def test_message(message):                        # test_message() is the event callback function.
-    emit('my response', {'data': 'got it!'})      # Trigger a new event called "my response"
-
 
 @app.after_request
 def after_request(response):
@@ -102,7 +85,7 @@ def login():
             session['admin'] = user.admin
             return redirect(url_for('main'))
         else:
-            error_message = Markup('<div class="alert alert-danger" role="alert">¡Usuario o contraseña no validos!</div>')      
+            error_message = Markup('<div class="alert alert-danger" role="alert">¡Usuario o contraseña no validos!</div>')
             flash(error_message) 
 
     return render_template('bench_control/login.html', form = login_form)
@@ -137,7 +120,6 @@ def logout():
 
 if __name__ == "__main__":
     csrf.init_app(app)
-    #var_socketio.init_app(app)
     db.init_app(app)
 
     with app.app_context():
@@ -152,4 +134,4 @@ if __name__ == "__main__":
             db.session.add(user)
             db.session.commit()
 
-    app.run(port = 8000)
+    app.run(host='0.0.0.0', port = 8000)
