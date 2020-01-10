@@ -137,4 +137,4 @@ if __name__ == "__main__":
             db.session.add(user)
             db.session.commit()
     var_socketio.init_app(app, async_mode=None, logger=True, engineio_logger=True)
-    var_socketio.run(app, host='127.0.0.1', port=8000)
+    var_socketio.run(app, host='0.0.0.0', port=8000)

@@ -7,9 +7,13 @@ import socket
 thread_stop_event = Event()
 var_socketio = SocketIO()
 
+HOST = 'localhost'
+PORT_control = 9999
+PORT_cycles = 5000
+
 def startCiclosConsole(n_ciclos = 0):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", 9999))
+    s.bind((HOST, PORT_control))
     s.listen(1)
     clientsocket, address = s.accept()
     msg =  "{0} Ciclos enviados a {1}".format(n_ciclos, address)
@@ -19,7 +23,7 @@ def startCiclosConsole(n_ciclos = 0):
 
 def stopConsole(arg = []):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", 9999))
+    s.bind((HOST, PORT_control))
     s.listen(1)
     clientsocket, address = s.accept()
     msg =  "Parar a {0}".format(address)
@@ -29,18 +33,18 @@ def stopConsole(arg = []):
 
 def resetConsole(arg = []):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", 9999))
+    s.bind((HOST, PORT_control))
     s.listen(1)
     clientsocket, address = s.accept()
     msg =  "Reiniciar a {0}".format( address)
     clientsocket.send(bytes('0', "utf-8"))
     clientsocket.close()
     return msg, 0
-    
+
 def getCurrentCycle():
     while not thread_stop_event.isSet():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", 5000))
+        s.connect((HOST, PORT_cycles))
         number = s.recv(1024)
         number = number.decode('utf-8')
         s.close()
