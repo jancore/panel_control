@@ -6,35 +6,26 @@ Created on Mon Dec  9 13:29:34 2019
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, g, Markup
 from flask_wtf import CSRFProtect
-#from flask_restful import Resource, Api
-from asyncThreads import var_socketio, RandomThread
 from config import DevelopmentConfig
 from models import db, User
+from flask_socketio import SocketIO, emit
+from threading import Thread, Event
+from socketFunctions import var_socketio, getCurrentCycle, startCiclosConsole, stopConsole, resetConsole
 import forms, json
-import gpioFunctions
 
 app =  Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
-#api = Api(app)
+
+thread = Thread()
 
 n_cycles = 0
 current_cycle = 0
 
-# class CurrentCycles(Resource):
-#     def get(self):
-#         return {'cycle': current_cycle}
-
-#     def put(self):
-#         current_cycle = request.form['data']
-#         return {'cycle': current_cycle}
-
-#api.add_resource(CurrentCycles, '/<string>')
-
 funcionesPanel = {
-    "start" : gpioFunctions.startCiclosConsole,
-    "stop" : gpioFunctions.stopConsole,
-    "reset" : gpioFunctions.resetConsole,
+    "start" : startCiclosConsole,
+    "stop" : stopConsole,
+    "reset" : resetConsole,
 }
 
 @app.before_request
@@ -57,11 +48,9 @@ def main():
                 if n_cycles == None:
                         n_cycles = 0
                 
-                current_cycle = funcionesPanel[panel_form.action()](n_cycles)       
-                return redirect(url_for('main'))
+                msg = funcionesPanel[panel_form.action()](n_cycles)       
         else:
-            funcionesPanel[panel_form.action()](n_cycles)       
-            return redirect(url_for('main'))
+            msg, n_cycles = funcionesPanel[panel_form.action()](n_cycles)       
     
     success_message = Markup('<h5>Bienvenido ' + session['username'] + '</h5>')
     flash(success_message)
@@ -118,6 +107,20 @@ def logout():
         session.pop('username')
     return redirect(url_for('login'))
 
+@var_socketio.on('connect')
+def test_connect():
+    # need visibility of the global thread object
+    global thread
+    print('Server connected')
+    
+    if not thread.isAlive():
+        print("Starting Thread")
+        thread = var_socketio.start_background_task(getCurrentCycle)
+
+@var_socketio.on('disconnect')
+def test_disconnect():
+    print('Server disconnected')
+
 if __name__ == "__main__":
     csrf.init_app(app)
     db.init_app(app)
@@ -133,5 +136,5 @@ if __name__ == "__main__":
             )
             db.session.add(user)
             db.session.commit()
-
-app.run(host='0.0.0.0', port = 8000)
+    var_socketio.init_app(app, async_mode=None, logger=True, engineio_logger=True)
+    var_socketio.run(app, host='127.0.0.1', port=8000)

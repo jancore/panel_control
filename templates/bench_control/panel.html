@@ -9,6 +9,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.4.1.slim.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/panel.js') }}"></script>
     {% from "_macro.html" import render_form %}
 
@@ -32,7 +33,7 @@
                     </li>&nbsp;
                     {% endif %}
 
-                    <li role="presentation"><a href="logout"> Cerrar sesión </a>
+                    <li role="presentation"><a id="logout" href="logout"> Cerrar sesión </a>
                     </li>
                 </ul>
             </nav>
@@ -45,12 +46,12 @@
         <div class="jumbotron">
             <h1>Lista de Acciones</h1>
             <form name="panelAcciones" id="cyclesForm" method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" >
                 <div class="container">
                     <ul class="nav nav-tabs">
                         <li >
                             <div data-toggle="tab">
-                                {{ render_form(form.cyclesForm.cycles, class='form-control', type='number', placeholder=form.cyclesForm.cycles.id ) }}
+                                {{ render_form(form.cyclesForm.cycles, id='cyclesField', class='form-control', type='number', placeholder=form.cyclesForm.cycles.id ) }}
                             </div>
                             <!-- Modal Confirmación marcha-->
                             <div class="modal fade" id="marchaModal" tabindex="-1" role="dialog"
