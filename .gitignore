@@ -3,3 +3,4 @@ __pycache__/
 *.db
 server.py
 client.py
+plc_fins.py

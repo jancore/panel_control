@@ -10,14 +10,13 @@ from config import DevelopmentConfig
 from models import db, User
 from flask_socketio import SocketIO, emit
 from threading import Thread, Event
-from socketFunctions import var_socketio, getCurrentCycle, startCiclosConsole, stopConsole, resetConsole
+from socketFunctions import var_socketio, getCurrentCycle, startCiclosConsole, stopConsole, resetConsole, stop_thread
 import forms, json
+from time import sleep
 
 app =  Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
-
-thread = Thread()
 
 n_cycles = 0
 current_cycle = 0
@@ -28,6 +27,11 @@ funcionesPanel = {
     "reset" : resetConsole,
 }
 
+
+thread = Thread()
+thread_bench = Thread(target = funcionesPanel['reset'])
+# thread_bench.daemon = True
+
 @app.before_request
 def before_request():
     if 'username' not in session and request.endpoint != 'login':
@@ -37,7 +41,7 @@ def before_request():
 
 @app.route("/", methods = ['GET', 'POST'])
 def main():
-    global n_cycles, current_cycle
+    global n_cycles, current_cycle, thread_bench, stop_thread
 
     panel_form = forms.PanelForms(request.form)
     
@@ -48,10 +52,17 @@ def main():
                 if n_cycles == None:
                         n_cycles = 0
                 
-                msg = funcionesPanel[panel_form.action()](n_cycles)       
-        else:
-            msg, n_cycles = funcionesPanel[panel_form.action()](n_cycles)       
+                thread_bench = Thread(target = funcionesPanel[panel_form.action()], args = (n_cycles,))
+
+        elif panel_form.action() == 'stop' or panel_form.action() == 'reset':
+            stop_thread = True
+            # thread_bench.join()
+            thread_bench = Thread(target = funcionesPanel[panel_form.action()])
+            stop_thread = False      
     
+    
+    # if not thread_bench.isAlive():
+    thread_bench.start()
     success_message = Markup('<h5>Bienvenido ' + session['username'] + '</h5>')
     flash(success_message)
     
