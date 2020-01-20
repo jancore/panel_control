@@ -16,22 +16,20 @@ class CreateForm(Form):
     ])
     password = PasswordField('Password', [validators.Required(message = 'La contraseña es requerida')])
 
-    def validate_username(form, field):
+    def validate_username(self, form, field):
         username = field.data
         user = User.query.filter_by(username = username).first()
         if user != None:
             raise validators.ValidationError('El nombre de usuario ya se encuentra registrado.')
 
 class ActionsForm(Form):
-    stop = SubmitField(id="stop")
-    reset = SubmitField(id="reset")
+    pass
 
 class CyclesForm(Form):
     cycles = IntegerField(id='Número de ciclos',validators=[
                                   validators.NumberRange(min=1, max=10**9, message='Introduce un entero mayor que 0'),
                                   validators.Optional(True),
-                                  ])                   
-    submit = SubmitField(id="start")
+                                  ])      
 
 class PanelForms(Form):
     cyclesForm = FormField(CyclesForm)

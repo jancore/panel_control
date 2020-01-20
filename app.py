@@ -4,33 +4,20 @@ Created on Mon Dec  9 13:29:34 2019
 @author: antoniojavier.perez
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, g, Markup
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Markup
 from flask_wtf import CSRFProtect
 from config import DevelopmentConfig
 from models import db, User
-from flask_socketio import SocketIO, emit
-from threading import Thread, Event
-from socketFunctions import var_socketio, getCurrentCycle, startCiclosConsole, stopConsole, resetConsole, stop_thread
-import forms, json
-from time import sleep
+import forms
+from socketFunctions import Commands, var_socketio
 
 app =  Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
 
 n_cycles = 0
-current_cycle = 0
-
-funcionesPanel = {
-    "start" : startCiclosConsole,
-    "stop" : stopConsole,
-    "reset" : resetConsole,
-}
-
-
-thread = Thread()
-thread_bench = Thread(target = funcionesPanel['reset'])
-# thread_bench.daemon = True
+current_cycle = 0  
+commands = Commands()
 
 @app.before_request
 def before_request():
@@ -38,39 +25,43 @@ def before_request():
         return redirect(url_for('login'))
     elif 'username' in session and request.endpoint == 'login':
         return redirect(url_for('main'))
+    # elif 'username' in session and request.endpoint == 'login':
 
 @app.route("/", methods = ['GET', 'POST'])
 def main():
-    global n_cycles, current_cycle, thread_bench, stop_thread
+    global n_cycles, current_cycle, stop_thread
 
     panel_form = forms.PanelForms(request.form)
-    
-    if request.method == 'POST':
-        if panel_form.action() == 'start':
-            if panel_form.cyclesForm.cycles.validate(request.form):
-                n_cycles = panel_form.cyclesForm.cycles.data
-                if n_cycles == None:
-                        n_cycles = 0
-                
-                thread_bench = Thread(target = funcionesPanel[panel_form.action()], args = (n_cycles,))
 
-        elif panel_form.action() == 'stop' or panel_form.action() == 'reset':
-            stop_thread = True
-            # thread_bench.join()
-            thread_bench = Thread(target = funcionesPanel[panel_form.action()])
-            stop_thread = False      
-    
-    
-    # if not thread_bench.isAlive():
-    thread_bench.start()
     success_message = Markup('<h5>Bienvenido ' + session['username'] + '</h5>')
     flash(success_message)
-    
+
     return render_template('bench_control/panel.html', form = panel_form, admin = session['admin'], cycles=n_cycles, current_cycle=current_cycle)
 
 @app.after_request
 def after_request(response):
     return response
+
+@app.route('/command/<c>')
+def send_command(c):
+    global stop_thread, n_cycles, commands
+    aux = request.args.get('n_cycles')
+    print(aux)
+    if len(aux) == 0:
+        aux = 0
+    n_cycles = int(aux)
+    if(c == 'start'):
+        commands.StartCiclosConsole(c, n_cycles)
+    if(c == 'stop'):
+        stop_thread = True
+        commands.StopConsole(c, n_cycles)
+        stop_thread = False
+    if(c == 'reset'):
+        stop_thread = True
+        commands.ResetConsole(c, 0)
+        stop_thread = False
+    
+    return ''
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():    
@@ -118,20 +109,6 @@ def logout():
         session.pop('username')
     return redirect(url_for('login'))
 
-@var_socketio.on('connect')
-def test_connect():
-    # need visibility of the global thread object
-    global thread
-    print('Server connected')
-    
-    if not thread.isAlive():
-        print("Starting Thread")
-        thread = var_socketio.start_background_task(getCurrentCycle)
-
-@var_socketio.on('disconnect')
-def test_disconnect():
-    print('Server disconnected')
-
 if __name__ == "__main__":
     csrf.init_app(app)
     db.init_app(app)
@@ -147,5 +124,6 @@ if __name__ == "__main__":
             )
             db.session.add(user)
             db.session.commit()
-    var_socketio.init_app(app, async_mode=None, logger=True, engineio_logger=True)
+    var_socketio.init_app(app, async_mode='threading', logger=True, engineio_logger=True)
     var_socketio.run(app, host='0.0.0.0', port=8000)
+    # app.run(host='0.0.0.0', port=8000)

@@ -29,7 +29,7 @@
                     {% endwith %}
 
                     {% if admin %}
-                    <li role="presentation"><a href="create"> Crear usuario </a>
+                    <li role="presentation"><a id ="create" href="create"> Crear usuario </a>
                     </li>&nbsp;
                     {% endif %}
 
@@ -65,7 +65,7 @@
                                         </div>
                                         <div class="modal-body">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                            <a>{{ render_form(form.cyclesForm.submit, id='btnAceptarMarcha', class='btn btn-primary', value='Aceptar') }}</a>
+                                            <button type="button" id='btnAceptarMarcha' class="btn btn-primary" data-dismiss="modal">Aceptar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -93,9 +93,9 @@
                 <p>
                     <button type="button" class="btn btn-lg btn-success" data-toggle="modal"
                         data-target="#marchaModal">Marcha</button>
-                    <a>{{ render_form(form.actionsForm.stop, id='btnStop', class='btn btn-lg btn-danger', value='Paro') }}</a>
+                    <a><button type="button" id='btnStop' class="btn btn-lg btn-danger">Paro</button></a>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <a>{{ render_form(form.actionsForm.reset, id='btnReset', class='btn btn-lg btn-primary', value='Reset') }}</a>
+                    <a><button type="button" id='btnReset' class="btn btn-lg btn-primary">Reset</button></a>
                 </p>
 
             </form>
