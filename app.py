@@ -126,4 +126,3 @@ if __name__ == "__main__":
             db.session.commit()
     var_socketio.init_app(app, async_mode='threading', logger=True, engineio_logger=True)
     var_socketio.run(app, host='0.0.0.0', port=8000)
-    # app.run(host='0.0.0.0', port=8000)

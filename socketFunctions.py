@@ -9,12 +9,15 @@ thread_stop_event = Event()
 var_socketio = SocketIO()
 
 stop_thread = False
+HOST = '192.168.1.212'
+DEST_NODE = 212
+ORIG_NODE = 79
 
 class Commands:   
     def __init__(self):         
         self.fins_instance = fins.udp.UDPFinsConnection() 
-        self.fins_instance.dest_node_add=212
-        self.fins_instance.srce_node_add=79
+        self.fins_instance.dest_node_add=DEST_NODE
+        self.fins_instance.srce_node_add=ORIG_NODE
 
     def StartCiclosConsole(self, command, n_cycles=0):
         global stop_thread, current_cycle     
@@ -22,9 +25,9 @@ class Commands:
         if command == 'start' and (not stop_thread):
             self.fins_instance.fins_socket.close()                       
             self.fins_instance = fins.udp.UDPFinsConnection() 
-            self.fins_instance.dest_node_add=212
-            self.fins_instance.srce_node_add=79                    
-            self.fins_instance.connect('192.168.1.212')                      
+            self.fins_instance.dest_node_add=DEST_NODE
+            self.fins_instance.srce_node_add=ORIG_NODE                    
+            self.fins_instance.connect(HOST)                      
             var_socketio.emit('newcycle', {'current_cycle': '{0}'.format(0), 'n_cycles': '{0}'.format(n_cycles)})
             try:
                 for cicle in range(n_cycles):
@@ -63,9 +66,9 @@ class Commands:
             stop_thread = True
             self.fins_instance.fins_socket.close()       
             self.fins_instance = fins.udp.UDPFinsConnection() 
-            self.fins_instance.dest_node_add=212
-            self.fins_instance.srce_node_add=79    
-            self.fins_instance.connect('192.168.1.212')
+            self.fins_instance.dest_node_add=DEST_NODE
+            self.fins_instance.srce_node_add=ORIG_NODE    
+            self.fins_instance.connect(HOST)
 
             try:
                 self.fins_instance.memory_area_write(fins.FinsPLCMemoryAreas().CIO_WORD,b'\x00\x64\x00',b'\x00\x01',1)
@@ -89,9 +92,9 @@ class Commands:
             stop_thread = True
             self.fins_instance.fins_socket.close() 
             self.fins_instance = fins.udp.UDPFinsConnection() 
-            self.fins_instance.dest_node_add=212
-            self.fins_instance.srce_node_add=79   
-            self.fins_instance.connect('192.168.1.212') 
+            self.fins_instance.dest_node_add=DEST_NODE
+            self.fins_instance.srce_node_add=ORIG_NODE   
+            self.fins_instance.connect(HOST) 
 
             try:
                 self.fins_instance.memory_area_write(fins.FinsPLCMemoryAreas().CIO_WORD,b'\x00\x64\x00',b'\x00\x01',1)
