@@ -18,7 +18,6 @@ csrf = CSRFProtect()
 n_cycles = 0
 current_cycle = 0
 commands = Commands()
-session['users'] = 0
 
 @app.before_request
 def before_request():
@@ -79,6 +78,8 @@ def login():
         if user is not None and user.verify_password(password):
             session['username'] = username
             session['admin'] = user.admin
+            if 'users' not in session:
+                session['users'] = 0
             session['users'] = session['users'] + 1
             return redirect(url_for('main'))
         else:
