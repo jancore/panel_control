@@ -24,7 +24,7 @@ class Commands:
             self.fins_instance = fins.udp.UDPFinsConnection() 
             self.fins_instance.dest_node_add=212
             self.fins_instance.srce_node_add=79                    
-            self.fins_instance.connect('169.254.164.212')                      
+            self.fins_instance.connect('192.168.1.212')                      
             var_socketio.emit('newcycle', {'current_cycle': '{0}'.format(0), 'n_cycles': '{0}'.format(n_cycles)})
             try:
                 for cicle in range(n_cycles):
@@ -65,7 +65,7 @@ class Commands:
             self.fins_instance = fins.udp.UDPFinsConnection() 
             self.fins_instance.dest_node_add=212
             self.fins_instance.srce_node_add=79    
-            self.fins_instance.connect('169.254.164.212')
+            self.fins_instance.connect('192.168.1.212')
 
             try:
                 self.fins_instance.memory_area_write(fins.FinsPLCMemoryAreas().CIO_WORD,b'\x00\x64\x00',b'\x00\x01',1)
@@ -91,7 +91,7 @@ class Commands:
             self.fins_instance = fins.udp.UDPFinsConnection() 
             self.fins_instance.dest_node_add=212
             self.fins_instance.srce_node_add=79   
-            self.fins_instance.connect('169.254.164.212') 
+            self.fins_instance.connect('192.168.1.212') 
 
             try:
                 self.fins_instance.memory_area_write(fins.FinsPLCMemoryAreas().CIO_WORD,b'\x00\x64\x00',b'\x00\x01',1)
