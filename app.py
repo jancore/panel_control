@@ -21,14 +21,18 @@ commands = Commands()
 
 @app.before_request
 def before_request():
-    if 'username' not in session and request.endpoint != 'login' and session['users'] < 2:
+    # login_form = forms.LoginForm(request.form)
+    # if 'user' not in session:
+    #     session['user'] = False
+    if 'username' not in session and request.endpoint != 'login':# and (not session['user']):
         return redirect(url_for('login'))
-    elif 'username' in session and request.endpoint == 'login' and session['users'] < 2:
+    elif 'username' in session and request.endpoint == 'login' :#and not session['user']:
         return redirect(url_for('main'))
-    else:
-        error_message = Markup('<div class="alert alert-danger" role="alert">BANCO OCUPADO. Vuelva a intentarlo más tarde.</div>')
-        flash(error_message) 
-        return render_template('bench_control/login.html', form = login_form)
+    # else:
+    #     print(session['user'])
+    #     error_message = Markup('<div class="alert alert-danger" role="alert">BANCO OCUPADO. Vuelva a intentarlo más tarde.</div>')
+    #     flash(error_message) 
+    #     return render_template('bench_control/login.html', form = login_form)
 
 
 @app.route("/", methods = ['GET', 'POST'])
@@ -78,9 +82,7 @@ def login():
         if user is not None and user.verify_password(password):
             session['username'] = username
             session['admin'] = user.admin
-            if 'users' not in session:
-                session['users'] = 0
-            session['users'] = session['users'] + 1
+            # session['user'] = True
             return redirect(url_for('main'))
         else:
             error_message = Markup('<div class="alert alert-danger" role="alert">¡Usuario o contraseña no validos!</div>')
@@ -113,7 +115,7 @@ def create():
 @app.route('/logout', methods = ['GET', 'POST'])
 def logout():
     if 'username' in session:
-        session['users'] = session['users'] - 1
+        # session['user'] = False
         session.pop('username')
     return redirect(url_for('login'))
 

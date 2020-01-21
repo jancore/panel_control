@@ -14,7 +14,8 @@ $(document).ready(function () {
     $("#btnReset").click();
   });
 
-  $("#btnReset").click(function () {
+  $("#btnReset").click(function () {    
+    $("#cyclesField").prop('disabled',false);
     $.ajax({
       url: "/command/reset?n_cycles=0",
       type: "get",
@@ -24,7 +25,6 @@ $(document).ready(function () {
         console.log(textStatus, errorThrown);
       }
     });
-    $("#cyclesField").disabled = true;
   });
 
   $("#btnStop").click(function () {
@@ -40,6 +40,7 @@ $(document).ready(function () {
   });
 
   $("#btnAceptarMarcha").click(function () {
+    $("#cyclesField").prop('disabled',true);
     $.ajax({
     url: "/command/start?n_cycles=" + $('#cyclesField').val(),
     type: "get",
@@ -50,7 +51,6 @@ $(document).ready(function () {
     }
     });
 
-    $("#cyclesField").disabled = true;
   });
 
   //connect to the socket server.
