@@ -16,16 +16,21 @@ app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
 
 n_cycles = 0
-current_cycle = 0  
+current_cycle = 0
 commands = Commands()
+session['users'] = 0
 
 @app.before_request
 def before_request():
-    if 'username' not in session and request.endpoint != 'login':
+    if 'username' not in session and request.endpoint != 'login' and session['users'] < 2:
         return redirect(url_for('login'))
-    elif 'username' in session and request.endpoint == 'login':
+    elif 'username' in session and request.endpoint == 'login' and session['users'] < 2:
         return redirect(url_for('main'))
-    # elif 'username' in session and request.endpoint == 'login':
+    else:
+        error_message = Markup('<div class="alert alert-danger" role="alert">BANCO OCUPADO. Vuelva a intentarlo más tarde.</div>')
+        flash(error_message) 
+        return render_template('bench_control/login.html', form = login_form)
+
 
 @app.route("/", methods = ['GET', 'POST'])
 def main():
@@ -51,14 +56,14 @@ def send_command(c):
         aux = 0
     n_cycles = int(aux)
     if(c == 'start'):
-        commands.StartCiclosConsole(c, n_cycles)
+        commands.StartCiclosConsole(n_cycles)
     if(c == 'stop'):
         stop_thread = True
-        commands.StopConsole(c, n_cycles)
+        commands.StopConsole(n_cycles)
         stop_thread = False
     if(c == 'reset'):
         stop_thread = True
-        commands.ResetConsole(c, 0)
+        commands.ResetConsole(0)
         stop_thread = False
     
     return ''
@@ -74,6 +79,7 @@ def login():
         if user is not None and user.verify_password(password):
             session['username'] = username
             session['admin'] = user.admin
+            session['users'] = session['users'] + 1
             return redirect(url_for('main'))
         else:
             error_message = Markup('<div class="alert alert-danger" role="alert">¡Usuario o contraseña no validos!</div>')
@@ -106,6 +112,7 @@ def create():
 @app.route('/logout', methods = ['GET', 'POST'])
 def logout():
     if 'username' in session:
+        session['users'] = session['users'] - 1
         session.pop('username')
     return redirect(url_for('login'))
 

@@ -24,6 +24,7 @@ $(document).ready(function () {
         console.log(textStatus, errorThrown);
       }
     });
+    $("#cyclesField").disabled = true;
   });
 
   $("#btnStop").click(function () {
@@ -47,8 +48,9 @@ $(document).ready(function () {
     error: function (jqXHR, textStatus, errorThrown) {
       console.log(textStatus, errorThrown);
     }
-  });
+    });
 
+    $("#cyclesField").disabled = true;
   });
 
   //connect to the socket server.
