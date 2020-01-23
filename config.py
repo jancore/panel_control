@@ -5,5 +5,5 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/bench_control'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:JanSoltec93@localhost/bench_control'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
